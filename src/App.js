@@ -4,6 +4,7 @@ import {
   Box,
   Flex,
   Divider,
+  Heading,
 } from "@chakra-ui/react";
 import CodeEditor from "./components/CodeEditor";
 import InputComponent from "./components/InputComponent";
@@ -31,6 +32,7 @@ function App() {
 
   return (
     <ChakraProvider>
+      <Heading textAlign='center' fontWeight='light' textShadow='2px 2px 2px gray'>compile.io</Heading>
       <Flex p={4}>
         <Box flex="4">
           <CodeEditor

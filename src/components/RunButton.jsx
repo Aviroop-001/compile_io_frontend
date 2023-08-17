@@ -18,13 +18,11 @@ const RunButton = ({ code, language, input, setoutput }) => {
       if (response.status === 500) {
         if (response.data && response.data.stderr) {
           setoutput(response.data.stderr);
-          console.log(response.data.stderr);
         } else {
           setoutput("Unknown error occurred during execution.");
         }
       } else {
         setoutput(response.data.output);
-        console.log(response.data.output);
       }
     } catch (error) {
       console.error(error);

@@ -126,7 +126,7 @@ const CodeEditor = ({ code, setcode, language, setlanguage}) => {
               onChange={handleFileChange}
               style={{ display: "none" }}
             />
-            <Tooltip title="Import Code">
+            <Tooltip label="Import Code">
               <Box
                 as={AttachmentIcon}
                 cursor="pointer"
@@ -137,7 +137,7 @@ const CodeEditor = ({ code, setcode, language, setlanguage}) => {
               />
             </Tooltip>
           </label>
-          <Tooltip title="Import Code">
+          <Tooltip label="Copy Code">
             <Box
               as={CopyIcon}
               cursor="pointer"
@@ -148,7 +148,7 @@ const CodeEditor = ({ code, setcode, language, setlanguage}) => {
               onClick={handleCopyButtonClick}
             />
           </Tooltip>
-          <Tooltip title="Share code snippet">
+          <Tooltip label="Create sharable link" aria-label="A tooltip">
             <Box
               as={LinkIcon}
               cursor="pointer"

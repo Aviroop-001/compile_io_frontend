@@ -9,20 +9,31 @@ import {
   useClipboard,
   Alert,
   AlertIcon,
+  useToast,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
 } from "@chakra-ui/react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
-import {
-  DownloadIcon,
-  AttachmentIcon,
-} from "@chakra-ui/icons";
+import { CopyIcon, AttachmentIcon, LinkIcon } from "@chakra-ui/icons";
 import MonacoEditor from "react-monaco-editor";
+import api from "../api";
 
 const CodeEditor = ({ code, setcode, language, setlanguage}) => {
 
   //States
   const [showAlert, setShowAlert] = useState(false);
+  const [sharedLink, setsharedLink] = useState();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   //Constants
+  const toast = useToast();
+  const { onCopy: onCopyShareLink } = useClipboard(sharedLink);
+  const { onCopy: onCopyCode } = useClipboard(code);
   const { onCopy } = useClipboard(code);
   const languageSetupCode = {
     cpp: `#include <iostream>\nusing namespace std;\n\nint main() {\n    // Your C++ code here\n    return 0;\n}`,
@@ -50,13 +61,46 @@ const CodeEditor = ({ code, setcode, language, setlanguage}) => {
   };
 
   const handleCopyButtonClick = () => {
-    onCopy();
+    onCopyCode();
     setShowAlert(true);
     setTimeout(() => {
       setShowAlert(false);
     }, 2000);
   };
 
+  const handleLinkShare = () =>{
+    onCopyShareLink();
+  }
+
+  const shareCodeSnippet = async () => {
+    toast({
+      title: "Sharing...",
+      position: "top-right",
+      status: "success",
+      duration: 5000,
+      isClosable: true,
+    });
+    try {
+      const response = await api.post("/share", { code });
+      const uniqueId = response.data.uniqueId;
+      const shareLink = `https://compile-io-frontend.vercel.app/shared/${uniqueId}`; 
+      setsharedLink(shareLink);
+       setIsModalOpen(true); 
+    } catch (error) {
+      console.error("Error sharing code snippet:", error);
+      toast({
+        title: "Error",
+        position: "top-right",
+        description: "Failed to share code snippet.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    } finally{
+      handleLinkShare();
+      console.log("Link copied");
+    }
+  };
 
   useEffect(() => {
     setcode(languageSetupCode[language] || languageSetupCode["cpp"]);
@@ -95,7 +139,7 @@ const CodeEditor = ({ code, setcode, language, setlanguage}) => {
           </label>
           <Tooltip title="Import Code">
             <Box
-              as={DownloadIcon}
+              as={CopyIcon}
               cursor="pointer"
               fontSize="xl"
               color="teal.500"
@@ -104,6 +148,35 @@ const CodeEditor = ({ code, setcode, language, setlanguage}) => {
               onClick={handleCopyButtonClick}
             />
           </Tooltip>
+          <Tooltip title="Share code snippet">
+            <Box
+              as={LinkIcon}
+              cursor="pointer"
+              fontSize="xl"
+              color="teal.500"
+              title="Copy Code"
+              ml="2rem"
+              onClick={() => shareCodeSnippet()}
+            />
+          </Tooltip>
+          {/* {sharedLink && (
+            <Button onClick={() => handleLinkShare()} ml='1rem'>share link</Button>
+          )} */}
+          <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+            <ModalOverlay />
+            <ModalContent>
+              <ModalHeader>Shareable Link</ModalHeader>
+              <ModalCloseButton />
+              <ModalBody>
+                <Box>{sharedLink}</Box>
+              </ModalBody>
+              <ModalFooter>
+                <Button onClick={() => handleLinkShare()} colorScheme="teal">
+                  <CopyIcon />
+                </Button>
+              </ModalFooter>
+            </ModalContent>
+          </Modal>
           {showAlert && (
             <Alert
               status="success"
